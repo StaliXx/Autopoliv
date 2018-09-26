@@ -9,11 +9,12 @@
 
 const char* host = "esp8266-autopoliv";
 unsigned long period_timer;
-unsigned int period_time = 1000;
+unsigned int period_time = 5000;
+const int sensorArray = 1; //0=1,1=2,2=3
+int sensorPin[sensorArray+1] = {16,14};
+int sensorValue[sensorArray+1];
 const int pin_input = A0;   // pin A0
-const int pin_A = 16;       // pin D0
-const int pin_B = 14;       // pin D5
-
+int i, y;
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -21,20 +22,32 @@ ESP8266HTTPUpdateServer httpUpdater;
 void period_tick() {
   if (millis() - period_timer >= period_time){
     period_timer = millis();
-    digitalWrite(pin_B, HIGH);
-    Serial.println(analogRead(pin_input));
-    digitalWrite(pin_B, LOW);
-    Serial.println(analogRead(pin_input));
+    for (i = 0; i <= sensorArray; i++) {
+      digitalWrite(sensorPin[i], HIGH);
+      delay(500);
+      // sensorValue[i] = analogRead(pin_input);
+      sensorValue[i] = 0;
+      for (y = 0; y < 3; y++) {
+        sensorValue[i] += analogRead(pin_input);
+      }
+      sensorValue[i] /= 3;
+      Serial.print("Sensor ");
+      Serial.print(i);
+      Serial.print(" = ");
+      Serial.println(sensorValue[i]);
+      digitalWrite(sensorPin[i], LOW);
+      delay(500);
+    }
+
   }
 }
 
 void setup() {
     pinMode(pin_input, INPUT);
-    pinMode(pin_A, OUTPUT);
-    pinMode(pin_B, OUTPUT);
-    digitalWrite(pin_A, HIGH);
-    digitalWrite(pin_B, LOW);
-
+    for (i = 0; i <= sensorArray; i++) {
+      pinMode(sensorPin[i], OUTPUT);
+      digitalWrite(sensorPin[i], LOW);
+    }
     Serial.begin(115200);
     WiFiManager wifiManager;
     wifiManager.autoConnect(host,"9268168144");
