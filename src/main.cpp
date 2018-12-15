@@ -9,7 +9,7 @@
 
 const char* host = "esp8266-autopoliv";
 unsigned long period_timer;
-unsigned int period_time = 5000;
+unsigned int period_time = 10000;
 const int sensorArray = 1; //0=1,1=2,2=3
 int sensorPin[sensorArray+1] = {16,14};
 int sensorValue[sensorArray+1];
@@ -24,11 +24,12 @@ void period_tick() {
     period_timer = millis();
     for (i = 0; i <= sensorArray; i++) {
       digitalWrite(sensorPin[i], HIGH);
-      delay(500);
+      delay(1000);
       // sensorValue[i] = analogRead(pin_input);
       sensorValue[i] = 0;
       for (y = 0; y < 3; y++) {
         sensorValue[i] += analogRead(pin_input);
+        delay(100);
       }
       sensorValue[i] /= 3;
       Serial.print("Sensor ");
